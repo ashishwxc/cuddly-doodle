@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  < title>Dice Discount Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;   /* horizontal center */
+      align-items: center;       /* vertical center */
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+    }
+
+    .game-container {
+      text-align: center;
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      max-width: 90%;
+    }
+
+    .dice {
+      font-size: 90px;
+      margin: 10px;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 12px 25px;
+      margin-top: 20px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      background: #111;
+      color: white;
+    }
+
+    button:hover {
+      opacity: 0.85;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    @media (max-width: 480px) {
+      .dice {
+        font-size: 70px;
+      }
+      .game-container {
+        padding: 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    <h2>🎲 Roll the Dice & Win a Discount!</h2>
+
+    <div>
+      <span id="dice1" class="dice">🎲</span>
+      <span id="dice2" class="dice">🎲</span>
+    </div>
+
+    <button onclick="rollDice()">Roll Dice</button>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    function rollDice() {
+      const die1 = Math.floor(Math.random() * 6) + 1;
+      const die2 = Math.floor(Math.random() * 6) + 1;
+      const total = die1 + die2;
+
+      document.getElementById("dice1").textContent = die1;
+      document.getElementById("dice2").textContent = die2;
+      document.getElementById("result").textContent =
+        `🎉 You got ${total}% off your order!`;
+    }
+  </script>
+
+</body>
+</html>

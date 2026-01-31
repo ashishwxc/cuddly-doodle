@@ -2,50 +2,61 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  < title>Dice Discount Game</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+  <title>Roll & Win!</title>
 
+  <!-- Confetti library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
     body {
       height: 100vh;
       display: flex;
-      justify-content: center;   /* horizontal center */
-      align-items: center;       /* vertical center */
+      justify-content: center;
+      align-items: center;
       font-family: Arial, sans-serif;
       background: #f5f5f5;
+      margin: 0;
     }
 
     .game-container {
       text-align: center;
       background: white;
       padding: 40px;
-      border-radius: 12px;
+      border-radius: 14px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      max-width: 90%;
     }
 
     .dice {
       font-size: 90px;
       margin: 10px;
+      display: inline-block;
+    }
+
+    .rolling {
+      animation: shake 0.5s infinite;
+    }
+
+    @keyframes shake {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(10deg); }
+      50% { transform: rotate(-10deg); }
+      75% { transform: rotate(10deg); }
+      100% { transform: rotate(0deg); }
     }
 
     button {
       font-size: 18px;
-      padding: 12px 25px;
+      padding: 14px 28px;
       margin-top: 20px;
-      cursor: pointer;
       border: none;
       border-radius: 8px;
       background: #111;
       color: white;
+      cursor: pointer;
     }
 
-    button:hover {
-      opacity: 0.85;
+    button:disabled {
+      background: #aaa;
     }
 
     #result {
@@ -53,44 +64,116 @@
       font-size: 22px;
       font-weight: bold;
     }
-
-    @media (max-width: 480px) {
-      .dice {
-        font-size: 70px;
-      }
-      .game-container {
-        padding: 25px;
-      }
-    }
   </style>
 </head>
 <body>
 
-  <div class="game-container">
-    <h2>🎲 Roll the Dice & Win a Discount!</h2>
+<div class="game-container">
+  <h2>🎲 Roll the Dice & Win!</h2>
 
-    <div>
-      <span id="dice1" class="dice">🎲</span>
-      <span id="dice2" class="dice">🎲</span>
-    </div>
-
-    <button onclick="rollDice()">Roll Dice</button>
-
-    <div id="result"></div>
+  <div>
+    <span id="dice1" class="dice">🎲</span>
+    <span id="dice2" class="dice">🎲</span>
   </div>
 
-  <script>
-    function rollDice() {
-      const die1 = Math.floor(Math.random() * 6) + 1;
-      const die2 = Math.floor(Math.random() * 6) + 1;
-      const total = die1 + die2;
+  <button id="rollBtn" onclick="rollDice()">Roll Dice</button>
+  <div id="result"></div>
+</div>
 
-      document.getElementById("dice1").textContent = die1;
-      document.getElementById("dice2").textContent = die2;
-      document.getElementById("result").textContent =
-        `🎉 You got ${total}% off your order!`;
-    }
-  </script>
+<audio id="celebrationSound" src="celebration.mp3" loop></audio>
+
+<script>
+  const discountCodes = {
+    2: "MINI-WIN",
+    3: "LUCKY-THREE",
+    4: "FOUR-TUNE",
+    5: "HIGH-FIVE",
+    6: "SWEET-SIX",
+    7: "JACKPOT-7",
+    8: "DICE-DELIGHT",
+    9: "BIG-ROLLER",
+    10: "DOUBLE-DIGIT",
+    11: "OH-SO-LUCKY",
+    12: "MAX-MAGIC"
+  };
+
+  function speakDiscount(amount) {
+    const msg = new SpeechSynthesisUtterance(
+      `Woohoo! Congratulations! You just won ${amount} percent off your order!`
+    );
+
+    msg.pitch = 1.3;
+    msg.rate = 1;
+    msg.volume = 1;
+
+    const voices = speechSynthesis.getVoices();
+    const female = voices.find(v =>
+      v.name.toLowerCase().includes("female") ||
+      v.name.toLowerCase().includes("zira") ||
+      v.name.toLowerCase().includes("samantha")
+    );
+
+    if (female) msg.voice = female;
+    speechSynthesis.speak(msg);
+  }
+
+  function startConfettiLoop() {
+    const duration = 5000;
+    const end = Date.now() + duration;
+
+    (function frame() {
+      confetti({
+        particleCount: 5,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    })();
+  }
+
+  function rollDice() {
+    const d1 = document.getElementById("dice1");
+    const d2 = document.getElementById("dice2");
+    const btn = document.getElementById("rollBtn");
+    const sound = document.getElementById("celebrationSound");
+
+    btn.disabled = true;
+    d1.classList.add("rolling");
+    d2.classList.add("rolling");
+
+    const interval = setInterval(() => {
+      d1.textContent = Math.floor(Math.random() * 6) + 1;
+      d2.textContent = Math.floor(Math.random() * 6) + 1;
+    }, 100);
+
+    setTimeout(() => {
+      clearInterval(interval);
+
+      const final1 = Math.floor(Math.random() * 6) + 1;
+      const final2 = Math.floor(Math.random() * 6) + 1;
+      const total = final1 + final2;
+
+      d1.textContent = final1;
+      d2.textContent = final2;
+      d1.classList.remove("rolling");
+      d2.classList.remove("rolling");
+
+      document.getElementById("result").innerHTML = `
+        🎉 <strong>${total}% OFF!</strong><br>
+        Use code:<br>
+        <span style="font-size:26px;">${discountCodes[total]}</span>
+      `;
+
+      // 🎉 START CELEBRATION
+      sound.play();
+      startConfettiLoop();
+      speakDiscount(total);
+
+    }, 1500);
+  }
+</script>
 
 </body>
 </html>
